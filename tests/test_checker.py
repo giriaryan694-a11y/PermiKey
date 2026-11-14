@@ -30,6 +30,61 @@ class CheckerInputTests(unittest.TestCase):
         self.assertEqual(result["metadata"]["model_count"], 1)
         self.assertNotIn("dummy-test-value", json.dumps(result))
 
+    def test_default_ai_check_does_not_send_generation_request(self):
+        payload = {"object": "list", "data": [{"id": "gpt-4o-mini"}]}
+        with patch.object(checker, "_json_request", return_value=(200, {}, payload)) as request:
+            status, result = checker.validate_credentials({"provider": "openai", "token": "test-token"})
+        self.assertEqual(status, 200)
+        self.assertEqual(request.call_count, 1)
+        inference = next(check for check in result["checks"] if check["name"] == "Model inference permission")
+        self.assertEqual(inference["status"], "unknown")
+        self.assertIn("not run by default", inference["detail"].lower())
+
+    def test_opt_in_ai_check_sends_one_token_generation_probe(self):
+        models_payload = {"object": "list", "data": [{"id": "gpt-4o-mini"}]}
+        generation_payload = {"choices": [{"message": {"content": ""}}]}
+        with patch.object(
+            checker, "_json_request", side_effect=[(200, {}, models_payload), (200, {}, generation_payload)]
+        ) as request:
+            status, result = checker.validate_credentials({
+                "provider": "openai", "token": "test-token", "test_inference": True
+            })
+        self.assertEqual(status, 200)
+        self.assertEqual(request.call_count, 2)
+        inference = next(check for check in result["checks"] if check["name"] == "Model inference permission")
+        self.assertEqual(inference["status"], "confirmed")
+        probe_args, probe_kwargs = request.call_args
+        self.assertEqual(probe_args[0], "https://api.openai.com/v1/chat/completions")
+        body = json.loads(probe_kwargs["body"].decode("utf-8"))
+        self.assertEqual(body["max_completion_tokens"], 1)
+        self.assertEqual(body["model"], "gpt-4o-mini")
+        self.assertNotIn("test-token", json.dumps(result))
+
+    def test_openrouter_opt_in_fetches_catalogue_then_probes_inference(self):
+        key_payload = {"data": {"label": "demo-key", "limit": 10}}
+        catalogue_payload = {"data": [{"id": "openai/gpt-4o-mini"}]}
+        denied_payload = {"error": {"message": "model access denied"}}
+        with patch.object(
+            checker, "_json_request", side_effect=[
+                (200, {}, key_payload), (200, {}, catalogue_payload), (403, {}, denied_payload)
+            ]
+        ) as request:
+            status, result = checker.validate_credentials({
+                "provider": "openrouter", "token": "test-token", "test_inference": True
+            })
+        self.assertEqual(status, 200)
+        self.assertEqual(request.call_count, 3)
+        inference = next(check for check in result["checks"] if check["name"] == "Model inference permission")
+        self.assertEqual(inference["status"], "denied")
+        self.assertIn("openai/gpt-4o-mini", inference["detail"])
+
+    def test_inference_probe_is_rejected_for_unsupported_provider(self):
+        status, result = checker.validate_credentials({
+            "provider": "huggingface", "token": "test-token", "test_inference": True
+        })
+        self.assertEqual(status, 400)
+        self.assertIn("not supported", result["error"].lower())
+
     def test_403_is_not_labelled_invalid(self):
         with patch.object(checker, "_json_request", return_value=(403, {}, {"message": "forbidden"})):
             result = checker.validate_cloudflare("dummy-test-value")
