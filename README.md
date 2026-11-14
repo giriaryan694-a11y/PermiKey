@@ -67,6 +67,22 @@ A valid credential does not automatically have every permission. Some providers 
 - Checks are designed to be read-only. The optional AI inference test is the exception in that it creates a minimal generation request and may consume provider usage. It does not change provider settings or resources.
 - Never paste production credentials into a service you do not trust. For sensitive use, review the source and consider running your own copy locally.
 
+## Session and request protection
+
+When the homepage loads, PermiKey requests a short-lived session. The server issues a signed, 20-minute `HttpOnly`, `SameSite=Strict` cookie and returns a separate CSRF token to the page. Credential validation requires the matching cookie, CSRF header, same-origin `Origin` header, and (when supplied by the browser) same-origin Fetch Metadata. Requests without a valid session are rejected before provider validation. A hidden honeypot field adds a basic automated-form filter.
+
+The session cookie is not a CAPTCHA and is not a guarantee against sophisticated bots. It is one layer against blind cross-site submissions and direct calls without first obtaining a session. For stronger public-traffic abuse controls, enable Vercel Firewall / rate limiting or add a managed challenge such as Cloudflare Turnstile. This project does not keep a database or shared rate-limit store.
+
+### Required Vercel environment variable
+
+Set `PERMIKEY_SESSION_SECRET` in the Vercel project settings for Production, Preview, and Development. Use a cryptographically random value with at least 32 characters. Generate one locally with:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Do not commit this value to GitHub or expose it in frontend code. Vercel Function instances use this shared secret to verify each other's session cookies. If it is missing or shorter than 32 characters, the API returns a configuration error instead of issuing unverifiable sessions. Local `python app.py` runs use a temporary process-local secret automatically; sessions expire when the local process restarts.
+
 ## Run locally
 
 PermiKey uses the Python standard library and does not require a database or package installation.

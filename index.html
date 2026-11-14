@@ -31,7 +31,7 @@
     }
     * { box-sizing: border-box; }
     html { min-width: 320px; background: var(--bg); scroll-behavior: smooth; }
-    body { margin: 0; color: var(--text); background: radial-gradient(ellipse at 78% -10%, rgba(58, 128, 125, .10), transparent 36%), var(--bg); min-height: 100vh; }
+    body { margin: 0; color: var(--text); background: #0d1218; min-height: 100vh; }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     a { color: inherit; }
@@ -101,6 +101,45 @@
     .layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 17px; align-items: start; margin-top: 30px; }
     [hidden] { display: none !important; }
     .picker-section { margin-top: 31px; }
+    /* Homepage key identification */
+    .detect-panel { position: relative; overflow: hidden; padding: 22px; margin-top: 28px; border-color: rgba(105,224,189,.22); background: #111a23; }
+    .detect-panel::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); opacity: .8; }
+    .detect-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .detect-kicker { color: #8bd9c0; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 7px; }
+    .detect-title { margin: 0; font-size: 17px; letter-spacing: -.025em; }
+    .detect-copy { color: #8fa0af; font-size: 11px; line-height: 1.65; max-width: 570px; margin: 7px 0 0; }
+    .detect-local { color: #7f938e; font-size: 9px; white-space: nowrap; border: 1px solid rgba(105,224,189,.16); border-radius: 999px; padding: 6px 9px; }
+    .detect-form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; margin-top: 17px; }
+    .detect-input-wrap { position: relative; min-width: 0; }
+    .detect-input { height: 44px; padding-right: 58px; font-size: 12px; letter-spacing: .02em; }
+    .detect-reveal { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #8a9baa; font-size: 10px; padding: 5px; }
+    .detect-reveal:hover { color: var(--accent-2); }
+    .detect-button { min-width: 145px; border: 1px solid rgba(105,224,189,.28); border-radius: 9px; background: #b8e8d7; color: #10221b; font-size: 11px; font-weight: 800; padding: 0 16px; transition: background .15s, transform .15s; }
+    .detect-button:hover { background: #d0f2e5; transform: translateY(-1px); }
+    .detect-footnote { color: #718394; font-size: 9px; line-height: 1.55; margin-top: 9px; }
+    .detect-result { margin-top: 14px; padding: 13px; border: 1px solid rgba(148,169,188,.13); border-radius: 10px; background: rgba(5,12,18,.25); }
+    .detect-result-head { color: #d9e6ee; font-size: 11px; font-weight: 750; }
+    .detect-result-copy { color: #8b9dac; font-size: 10px; line-height: 1.55; margin-top: 4px; }
+    .detect-candidates { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+    .detect-candidate { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; border: 1px solid rgba(105,224,189,.25); border-radius: 8px; padding: 7px 10px; background: rgba(105,224,189,.07); color: #bcebd9; font-size: 10px; font-weight: 700; }
+    .detect-candidate:hover { background: rgba(105,224,189,.13); border-color: rgba(105,224,189,.45); }
+    .detect-no-match { color: #d6c59d; }
+    .picker-search { display: flex; align-items: center; gap: 8px; width: min(260px, 45%); }
+    .picker-search input { height: 35px; padding: 0 11px; font-size: 10px; }
+    .progress-panel { margin-top: 15px; padding: 12px 13px; border: 1px solid rgba(105,224,189,.15); border-radius: 10px; background: rgba(5,12,18,.28); }
+    .progress-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #b9c9d4; font-size: 10px; font-weight: 650; }
+    .progress-count { color: #8195a5; font-size: 9px; font-variant-numeric: tabular-nums; }
+    .progress-track { height: 5px; overflow: hidden; border-radius: 999px; margin-top: 10px; background: #25323d; }
+    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: #75d6b5; transition: width .25s ease, background .2s ease; }
+    .progress-fill.failed { background: #df8589; }
+    .progress-steps { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; }
+    .progress-step { color: #627587; font-size: 9px; }
+    .progress-step.current { color: #a9e6d0; }
+    .progress-step.done { color: #8ba99e; }
+    .progress-step.failed { color: #e5a0a2; }
+    .detect-panel, .picker-card, .panel { box-shadow: none; }
+    .picker-card { background: #111922; }
+    .panel { background: #121a23; }
     .picker-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 15px; }
     .picker-heading h2 { font-size: 18px; margin: 0; }
     .picker-heading p { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 6px 0 0; }
@@ -121,7 +160,7 @@
     .inference-option input { width: 15px; min-width: 15px; height: 15px; padding: 0; margin: 1px 0 0; accent-color: #70d9b8; }
     .inference-option label { margin: 0; color: #d5c49c; font-size: 10px; font-weight: 700; cursor: pointer; }
     .inference-option p { margin: 4px 0 0; color: #a99b7e; font-size: 9px; line-height: 1.55; }
-    .panel { background: linear-gradient(155deg, rgba(20, 30, 41, .97), rgba(15, 23, 32, .98)); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .panel { background: #121a23; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none; }
     .form-panel { padding: 23px; }
     .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
     .provider-title-wrap { display: flex; gap: 12px; align-items: center; }
@@ -192,6 +231,10 @@
     .error-banner { display: none; color: #f4a5a8; font-size: 10px; margin-top: 10px; }
     .bottom-credit { display: none; color: #657788; font-size: 10px; padding: 28px 0 0; }
     .mobile-overlay { display: none; }
+    /* Consistent, low-noise surfaces across the toolkit. */
+    .picker-card { background: #111922; }
+    .panel { background: #121a23; box-shadow: none; }
+    .picker-heading { flex-wrap: wrap; }
     @media (max-width: 1080px) { .layout { grid-template-columns: minmax(0,1fr) 255px; } .content { padding-left: 25px; padding-right: 25px; } .topbar { padding: 0 25px; } }
     @media (max-width: 820px) {
       .sidebar { transform: translateX(-100%); transition: transform .2s ease; width: 270px; box-shadow: 15px 0 45px rgba(0,0,0,.35); }
@@ -204,6 +247,9 @@
       .content { padding: 29px 20px 45px; }
       .layout { grid-template-columns: 1fr; }
       .picker-grid { grid-template-columns: 1fr; }
+      .detect-top { display: block; }
+      .detect-local { display: inline-flex; margin-top: 10px; }
+      .picker-search { width: min(240px, 50%); }
       .side-stack { grid-template-columns: 1fr 1fr; }
       .security-panel { grid-column: 1 / -1; }
     }
@@ -218,13 +264,21 @@
       .security-panel { grid-column: auto; }
       .field-row { grid-template-columns: 1fr; gap: 0; }
       .metadata { grid-template-columns: 1fr; }
+      .detect-panel { padding: 17px; }
+      .detect-form { grid-template-columns: 1fr; }
+      .detect-button { min-height: 42px; }
+      .picker-heading { display: block; }
+      .picker-search { width: 100%; margin-top: 12px; }
+      .picker-count { display: block; margin-top: 9px; }
       .form-actions { align-items: stretch; }
       .primary-btn { flex: 1; }
       .privacy-copy { width: 100%; }
       .bottom-credit { display: block; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
-  </style>
+  
+  .bot-trap{position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+</style>
 </head>
 <body>
   <div class="app">
@@ -269,9 +323,34 @@
           <div class="meta-chip"><b>Stateless</b> by design</div>
         </div>
 
+        <section class="detect-panel panel" id="detectPanel" aria-labelledby="detectTitle">
+          <div class="detect-top">
+            <div>
+              <div class="detect-kicker">Local format detection</div>
+              <h2 class="detect-title" id="detectTitle">Identify an API key</h2>
+              <p class="detect-copy">Paste a key to detect a recognisable provider format. If a match is found, continue straight to that provider's validator.</p>
+            </div>
+            <span class="detect-local">Runs in this browser</span>
+          </div>
+          <form class="detect-form" id="detectForm" autocomplete="off" novalidate>
+            <div class="detect-input-wrap">
+              <input class="detect-input" id="detectToken" type="password" placeholder="Paste an API key or access token" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="8192" aria-label="API key to identify">
+              <button class="detect-reveal" id="detectReveal" type="button" aria-label="Show key">Show</button>
+            </div>
+            <button class="detect-button" type="submit">Identify key <span aria-hidden="true">→</span></button>
+          </form>
+          <div class="detect-footnote">Pattern matching is only a hint, not proof that a key is valid. Your key is not sent anywhere during identification.</div>
+          <div class="detect-result" id="detectResult" hidden aria-live="polite">
+            <div class="detect-result-head" id="detectResultTitle"></div>
+            <div class="detect-result-copy" id="detectResultCopy"></div>
+            <div class="detect-candidates" id="detectCandidates"></div>
+          </div>
+        </section>
+
         <section class="picker-section" id="homeScreen">
           <div class="picker-heading">
-            <div><h2>Choose a service to get started</h2><p>Select a provider first. You will only see the credential fields needed for that service.</p></div>
+            <div><h2>Browse providers</h2><p>Choose a service manually or use the identifier above. Only the selected provider's credential fields will appear.</p></div>
+            <div class="picker-search"><input id="homeProviderSearch" type="search" placeholder="Search 23 providers…" autocomplete="off" aria-label="Search providers on homepage"></div>
             <span class="picker-count" id="pickerCount">23 integrations</span>
           </div>
           <div class="picker-grid" id="providerPicker" aria-label="Choose a provider"></div>
@@ -290,6 +369,7 @@
               </div>
               <p class="service-desc" id="providerDescription"></p>
               <form id="credentialForm" autocomplete="off" novalidate>
+                <div class="bot-trap" aria-hidden="true"><label for="companyWebsite">Leave this field empty</label><input id="companyWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
                 <div id="fields"></div>
                 <div class="inference-option" id="inferenceOption" hidden>
                   <input id="testInference" type="checkbox" name="test_inference" value="true">
@@ -300,6 +380,11 @@
                   <button class="primary-btn" id="submitButton" type="submit">Validate credential <span aria-hidden="true">→</span></button>
                   <button class="secondary-btn" type="reset" id="clearButton">Clear fields</button>
                   <span class="privacy-copy">No keys in URLs, browser storage, or result history.</span>
+                </div>
+                <div class="progress-panel" id="validationProgress" hidden aria-live="polite">
+                  <div class="progress-head"><span id="progressLabel">Preparing validation</span><span class="progress-count" id="progressCount">0 / 3</span></div>
+                  <div class="progress-track" id="progressBar" role="progressbar" aria-label="Validation stages" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progressFill"></div></div>
+                  <div class="progress-steps"><span class="progress-step" data-progress-step="1">Prepare</span><span class="progress-step" data-progress-step="2">Provider check</span><span class="progress-step" data-progress-step="3">Report</span></div>
                 </div>
                 <div class="error-banner" id="formError" role="alert"></div>
               </form>
@@ -408,15 +493,97 @@
   const fields = document.getElementById("fields");
   const form = document.getElementById("credentialForm");
   const submitButton = document.getElementById("submitButton");
+  let csrfToken = "";
+  let sessionPromise = null;
+
+  async function ensureSession(forceRefresh = false) {
+    if (forceRefresh) csrfToken = "";
+    if (csrfToken) return csrfToken;
+    if (sessionPromise) return sessionPromise;
+    const pending = (async () => {
+      const response = await fetch("/api/session", {
+        method: "GET",
+        headers: {"Accept": "application/json"},
+        cache: "no-store",
+        credentials: "same-origin",
+        referrerPolicy: "no-referrer"
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.csrf_token) {
+        throw new Error(payload.error || "Could not start a secure session. Refresh the page and try again.");
+      }
+      csrfToken = payload.csrf_token;
+      return csrfToken;
+    })();
+    sessionPromise = pending;
+    try {
+      return await pending;
+    } finally {
+      if (sessionPromise === pending) sessionPromise = null;
+    }
+  }
+
+  async function sendValidationRequest(data) {
+    const send = async () => {
+      const token = await ensureSession();
+      return fetch("/api/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-PermiKey-CSRF": token
+        },
+        cache: "no-store",
+        credentials: "same-origin",
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(data)
+      });
+    };
+
+    let response = await send();
+    if (response.status === 403) {
+      const failure = await response.clone().json().catch(() => ({}));
+      if (failure.code === "session_expired" || failure.code === "csrf_invalid") {
+        await ensureSession(true);
+        response = await send();
+      }
+    }
+    return response;
+  }
   const resultPanel = document.getElementById("resultPanel");
   const providerSearch = document.getElementById("providerSearch");
   const navSearchMeta = document.getElementById("navSearchMeta");
   const homeScreen = document.getElementById("homeScreen");
+  const detectPanel = document.getElementById("detectPanel");
   const workspaceScreen = document.getElementById("workspaceScreen");
   const providerPicker = document.getElementById("providerPicker");
+  const homeProviderSearch = document.getElementById("homeProviderSearch");
+  const detectForm = document.getElementById("detectForm");
+  const detectToken = document.getElementById("detectToken");
+  const detectResult = document.getElementById("detectResult");
+  const detectCandidates = document.getElementById("detectCandidates");
+  let detectedKey = "";
   let selected = null;
   const expandedCategories = new Set();
   const inferenceProviders = new Set(["openai", "nvidia", "groq", "openrouter", "gemini", "anthropic", "mistral", "cohere"]);
+  const keyDetectors = [
+    { regex: /^sk-or-v1-[a-z0-9_-]{8,}$/i, ids: ["openrouter"], label: "OpenRouter versioned key", confidence: "High" },
+    { regex: /^sk-ant-(?:api\d{2}-)?[a-z0-9_-]{8,}$/i, ids: ["anthropic"], label: "Anthropic API key", confidence: "High" },
+    { regex: /^sk-(?:proj|admin|svcacct)-[a-z0-9_-]{8,}$/i, ids: ["openai"], label: "OpenAI project or service key", confidence: "High" },
+    { regex: /^nvapi-[a-z0-9_-]{12,}$/i, ids: ["nvidia"], label: "NVIDIA API key", confidence: "High" },
+    { regex: /^gsk_[a-z0-9_-]{12,}$/i, ids: ["groq"], label: "Groq API key", confidence: "High" },
+    { regex: /^AIza[a-z0-9_-]{20,}$/i, ids: ["gemini"], label: "Google API key format", confidence: "High" },
+    { regex: /^hf_[a-z0-9]{20,}$/i, ids: ["huggingface"], label: "Hugging Face access token", confidence: "High" },
+    { regex: /^github_pat_[a-z0-9_]{20,}$/i, ids: ["github"], label: "GitHub fine-grained token", confidence: "High" },
+    { regex: /^gh[pousr]_[a-z0-9]{20,}$/i, ids: ["github"], label: "GitHub token", confidence: "High" },
+    { regex: /^glpat-[a-z0-9_-]{12,}$/i, ids: ["gitlab"], label: "GitLab personal access token", confidence: "High" },
+    { regex: /^npm_[a-z0-9]{20,}$/i, ids: ["npm"], label: "npm access token", confidence: "High" },
+    { regex: /^vcp_[a-z0-9_-]{16,}$/i, ids: ["vercel"], label: "Vercel access token", confidence: "High" },
+    { regex: /^xox[baprs]-[a-z0-9-]{10,}$/i, ids: ["slack"], label: "Slack token", confidence: "High" },
+    { regex: /^(?:AKIA|ASIA)[A-Z0-9]{16}$/, ids: ["aws", "aws_s3"], label: "AWS access key ID", confidence: "High", note: "The key ID alone cannot tell whether you want to check AWS identity or an S3 bucket. The secret access key is still required." },
+    { regex: /^ya29\.[a-z0-9._~-]{20,}$/i, ids: ["gcp", "gcp_storage"], label: "Google OAuth access token", confidence: "High", note: "Choose project IAM or Cloud Storage bucket checks. A project or bucket identifier is also required." },
+    { regex: /^sk-[a-z0-9_-]{24,}$/i, ids: ["openai"], label: "Possible legacy OpenAI key format", confidence: "Possible", note: "This older prefix is not unique to OpenAI. Confirm the provider before validating." }
+  ];
   providers.forEach(provider => { provider.supportsInference = inferenceProviders.has(provider.id); });
 
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -463,10 +630,12 @@
 
   function renderHome() {
     selected = null;
+    detectPanel.hidden = false;
     homeScreen.hidden = false;
     workspaceScreen.hidden = true;
     document.getElementById("crumbCurrent").textContent = "Choose a provider";
     resultPanel.classList.remove("visible");
+    homeProviderSearch.value = providerSearch.value;
     const matches = matchingProviders(providerSearch.value);
     const searching = providerSearch.value.trim().length > 0;
     const cards = categories.map(category => {
@@ -482,11 +651,15 @@
     renderNav();
   }
 
-  function selectProvider(provider) {
+  function selectProvider(provider, prefill = {}) {
     selected = provider;
+    detectedKey = "";
+    detectToken.value = "";
+    detectResult.hidden = true;
+    detectPanel.hidden = true;
     homeScreen.hidden = true;
     workspaceScreen.hidden = false;
-    renderProvider();
+    renderProvider(prefill);
     showMobileNav(false);
   }
 
@@ -501,7 +674,7 @@
     return `<div class="field"><label for="${id}">${esc(field.label)}${optional}</label><div class="input-wrap"><input class="${inputType === "password" ? "secret-input" : ""}" id="${id}" name="${field.name}" type="${inputType}" placeholder="${esc(field.placeholder || "")}" autocomplete="off" autocapitalize="off" spellcheck="false" ${field.optional ? "" : "required"} maxlength="8192">${reveal}</div>${field.hint ? `<div class="field-hint">${esc(field.hint)}</div>` : ""}</div>`;
   }
 
-  function renderProvider() {
+  function renderProvider(prefill = {}) {
     if (!selected) return;
     homeScreen.hidden = true;
     workspaceScreen.hidden = false;
@@ -511,14 +684,90 @@
     document.getElementById("providerDescription").textContent = selected.desc;
     document.getElementById("crumbCurrent").textContent = selected.category;
     fields.innerHTML = selected.fields.map(renderField).join("");
+    for (const [name, value] of Object.entries(prefill)) {
+      const input = document.getElementById(`field-${name}`);
+      if (input && typeof value === "string") input.value = value;
+    }
     const inferenceOption = document.getElementById("inferenceOption");
     inferenceOption.hidden = !selected.supportsInference;
     document.getElementById("testInference").checked = false;
     document.getElementById("formError").style.display = "none";
     resultPanel.classList.remove("visible");
+    document.getElementById("validationProgress").hidden = true;
     expandedCategories.add(selected.category);
     renderNav();
   }
+
+  function identifyKeyFormat(value) {
+    const candidate = String(value || "").trim();
+    if (!candidate) return null;
+    return keyDetectors.find(detector => detector.regex.test(candidate)) || null;
+  }
+
+  function renderDetection(detector) {
+    detectResult.hidden = false;
+    detectCandidates.innerHTML = "";
+    const title = document.getElementById("detectResultTitle");
+    const copy = document.getElementById("detectResultCopy");
+    if (!detector) {
+      title.textContent = "No reliable format match";
+      title.className = "detect-result-head detect-no-match";
+      copy.textContent = "This provider may use an opaque or shared key format. Choose a service from Browse providers and validate it there. No network request was made.";
+      return;
+    }
+    title.className = "detect-result-head";
+    title.textContent = `${detector.confidence === "High" ? "Likely format:" : "Possible format:"} ${detector.label}`;
+    copy.textContent = `${detector.note || "The prefix matches a known provider format."} Pattern recognition does not confirm that the credential is active or authorised.`;
+    detector.ids.forEach(id => {
+      const provider = providers.find(item => item.id === id);
+      if (!provider) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "detect-candidate";
+      button.dataset.detectProvider = id;
+      button.textContent = `Check with ${provider.name} →`;
+      detectCandidates.appendChild(button);
+    });
+  }
+
+  detectForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const value = detectToken.value.trim();
+    if (!value) {
+      detectToken.focus();
+      return;
+    }
+    const detector = identifyKeyFormat(value);
+    detectedKey = detector ? value : "";
+    renderDetection(detector);
+  });
+
+  detectCandidates.addEventListener("click", event => {
+    const button = event.target.closest("[data-detect-provider]");
+    if (!button || !detectedKey) return;
+    const provider = providers.find(item => item.id === button.dataset.detectProvider);
+    if (!provider) return;
+    const fieldName = provider.fields.some(field => field.name === "token") ? "token" :
+      (provider.fields.some(field => field.name === "access_key") ? "access_key" : null);
+    if (!fieldName) return;
+    const value = detectedKey;
+    detectedKey = "";
+    detectToken.value = "";
+    detectResult.hidden = true;
+    selectProvider(provider, {[fieldName]: value});
+  });
+
+  document.getElementById("detectReveal").addEventListener("click", () => {
+    const show = detectToken.type === "password";
+    detectToken.type = show ? "text" : "password";
+    document.getElementById("detectReveal").textContent = show ? "Hide" : "Show";
+    document.getElementById("detectReveal").setAttribute("aria-label", show ? "Hide key" : "Show key");
+  });
+
+  detectToken.addEventListener("input", () => {
+    detectedKey = "";
+    detectResult.hidden = true;
+  });
 
   function showMobileNav(open) {
     document.getElementById("sidebar").classList.toggle("open", open);
@@ -550,8 +799,13 @@
   });
 
   providerSearch.addEventListener("input", () => {
+    homeProviderSearch.value = providerSearch.value;
     if (!selected) renderHome();
     else renderNav();
+  });
+  homeProviderSearch.addEventListener("input", () => {
+    providerSearch.value = homeProviderSearch.value;
+    renderHome();
   });
   document.getElementById("backToProviders").addEventListener("click", renderHome);
 
@@ -576,8 +830,28 @@
     window.setTimeout(() => {
       fields.querySelectorAll("input[type='text']").forEach(input => { if (["field-access_key"].includes(input.id)) input.value = ""; });
       document.getElementById("formError").style.display = "none";
+      document.getElementById("validationProgress").hidden = true;
     }, 0);
   });
+
+  function setValidationProgress(step, label, failed = false) {
+    const panel = document.getElementById("validationProgress");
+    const fill = document.getElementById("progressFill");
+    const bar = document.getElementById("progressBar");
+    panel.hidden = false;
+    document.getElementById("progressLabel").textContent = label;
+    document.getElementById("progressCount").textContent = failed ? "Stopped" : `${step} / 3`;
+    const percent = [0, 33, 67, 100][step] || 0;
+    fill.style.width = `${percent}%`;
+    fill.classList.toggle("failed", failed);
+    bar.setAttribute("aria-valuenow", String(percent));
+    panel.querySelectorAll("[data-progress-step]").forEach(node => {
+      const nodeStep = Number(node.dataset.progressStep);
+      node.classList.toggle("done", !failed && nodeStep < step);
+      node.classList.toggle("current", !failed && nodeStep === step);
+      node.classList.toggle("failed", failed && nodeStep === step);
+    });
+  }
 
   function renderResult(data) {
     const status = document.getElementById("resultStatus");
@@ -605,7 +879,12 @@
     event.preventDefault();
     const error = document.getElementById("formError");
     error.style.display = "none";
-    const data = {provider: selected.id, test_inference: Boolean(selected.supportsInference && document.getElementById("testInference").checked)};
+    const honeypot = document.getElementById("companyWebsite");
+    const data = {
+      provider: selected.id,
+      test_inference: Boolean(selected.supportsInference && document.getElementById("testInference").checked),
+      website: honeypot ? honeypot.value : ""
+    };
     for (const field of selected.fields) {
       const input = document.getElementById(`field-${field.name}`);
       if (input) data[field.name] = input.value.trim();
@@ -618,19 +897,17 @@
     }
     submitButton.disabled = true;
     submitButton.textContent = "Checking provider…";
+    setValidationProgress(1, "Preparing the provider request");
     try {
-      const response = await fetch("/api/validate", {
-        method: "POST",
-        headers: {"Content-Type":"application/json", "Accept":"application/json"},
-        cache: "no-store",
-        credentials: "same-origin",
-        referrerPolicy: "no-referrer",
-        body: JSON.stringify(data)
-      });
+      setValidationProgress(2, "Waiting for the selected provider's response");
+      const response = await sendValidationRequest(data);
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || `Request failed (${response.status}).`);
+      setValidationProgress(3, "Provider response received · building report");
       renderResult(payload);
+      setValidationProgress(3, "Validation report ready");
     } catch (err) {
+      setValidationProgress(2, "Request stopped before a complete result", true);
       error.textContent = err instanceof Error ? err.message : "The request failed. Check your connection and try again.";
       error.style.display = "block";
     } finally {
@@ -647,6 +924,9 @@
     }
   });
 
+  // Obtain a short-lived HttpOnly session cookie and its CSRF token on page entry.
+  // Validation also calls ensureSession(), so it cannot proceed without this bootstrap.
+  ensureSession().catch(() => {});
   renderHome();
 })();
 </script>
