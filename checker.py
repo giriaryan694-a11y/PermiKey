@@ -131,7 +131,7 @@ def _bearer_models(provider: str, url: str, token: str, *, extra_headers: dict[s
     checks = [
         {"name": "Credential authentication", "status": "confirmed", "detail": "The provider accepted the credential."},
         {"name": "Model catalogue access", "status": "confirmed", "detail": f"The authenticated endpoint returned {len(models)} model entries."},
-        {"name": "Model inference permission", "status": "unknown", "detail": "Not tested. Listing models does not prove that a generation request is permitted."},
+        {"name": "Model inference permission", "status": "unknown", "detail": "Not run by default. Enable the optional minimal inference test to check one generation request."},
     ]
     return _result(provider, "valid", "Credential accepted. Model catalogue access confirmed; inference permissions were not tested.", checks, {
         "model_count": len(models),
@@ -167,7 +167,7 @@ def validate_cohere(token: str) -> dict[str, Any]:
     return _result("Cohere", "valid", "Credential accepted. Accessible model catalogue returned.", [
         {"name": "Credential authentication", "status": "confirmed", "detail": "The provider accepted the credential."},
         {"name": "Model catalogue access", "status": "confirmed", "detail": f"The endpoint returned {len(model_names)} model entries."},
-        {"name": "Model inference permission", "status": "unknown", "detail": "Not tested. Model visibility is not proof of inference entitlement."},
+        {"name": "Model inference permission", "status": "unknown", "detail": "Not run by default. Enable the optional minimal inference test to check one generation request."},
     ], {"model_count": len(model_names), "sample_models": model_names[:6]})
 
 
@@ -183,7 +183,7 @@ def validate_anthropic(token: str) -> dict[str, Any]:
     return _result("Anthropic", "valid", "Credential accepted. Model catalogue access confirmed; message-generation permissions were not tested.", [
         {"name": "Credential authentication", "status": "confirmed", "detail": "The provider accepted the credential."},
         {"name": "Model catalogue access", "status": "confirmed", "detail": f"The endpoint returned {len(models)} model entries."},
-        {"name": "Message generation permission", "status": "unknown", "detail": "Not tested. No billable message was sent."},
+        {"name": "Message generation permission", "status": "unknown", "detail": "Not run by default. Enable the optional minimal inference test to check one message request."},
     ], {"model_count": len(models), "sample_models": models[:6]})
 
 
@@ -251,7 +251,7 @@ def validate_openrouter(token: str) -> dict[str, Any]:
     return _result("OpenRouter", "valid", "Credential accepted. Key metadata and credit-budget fields are accessible.", [
         {"name": "Credential authentication", "status": "confirmed", "detail": "The provider accepted the credential."},
         {"name": "Key metadata access", "status": "confirmed", "detail": "The key information endpoint returned metadata."},
-        {"name": "Model request permission", "status": "unknown", "detail": "Not tested. No model request or billable generation was sent."},
+        {"name": "Model request permission", "status": "unknown", "detail": "Not run by default. Enable the optional minimal inference test to check one model request."},
     ], metadata)
 
 
@@ -810,15 +810,164 @@ def validate_aws_s3(
     ], {"bucket": bucket_name, "region": region, "http_status": status})
 
 
+# Inference tests are opt-in because even a one-token response may consume a
+# provider's paid quota. These probes use one fixed, harmless prompt and request
+# the smallest output budget supported by each API family.
+_INFERENCE_PROVIDERS = {
+    "openai", "nvidia", "groq", "openrouter", "gemini",
+    "anthropic", "mistral", "cohere",
+}
+
+
+def _choose_inference_model(provider_id: str, model_ids: list[Any]) -> str | None:
+    candidates = [
+        model for model in model_ids
+        if isinstance(model, str) and model and not any(
+            word in model.lower() for word in (
+                "embed", "rerank", "moderation", "whisper", "transcribe",
+                "text-to-speech", "tts", "dall-e", "image-generation",
+            )
+        )
+    ]
+    if provider_id == "openai":
+        preferences = ("gpt-4.1-mini", "gpt-4o-mini", "gpt-4.1", "gpt-4o")
+        for preferred in preferences:
+            if preferred in candidates:
+                return preferred
+    if provider_id == "gemini":
+        candidates = [model for model in candidates if "gemini" in model.lower()]
+    return candidates[0] if candidates else None
+
+
+def _post_inference_probe(
+    provider_id: str, token: str, model: str
+) -> tuple[int, dict[str, str], dict[str, Any] | list[Any] | None]:
+    """Send one opt-in, one-token generation request to a fixed provider URL."""
+    common_headers = {"Content-Type": "application/json"}
+    prompt = "Reply with OK."
+    if provider_id in {"openai", "nvidia", "groq", "openrouter", "mistral"}:
+        urls = {
+            "openai": "https://api.openai.com/v1/chat/completions",
+            "nvidia": "https://integrate.api.nvidia.com/v1/chat/completions",
+            "groq": "https://api.groq.com/openai/v1/chat/completions",
+            "openrouter": "https://openrouter.ai/api/v1/chat/completions",
+            "mistral": "https://api.mistral.ai/v1/chat/completions",
+        }
+        body: dict[str, Any] = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        if provider_id == "openai":
+            body["max_completion_tokens"] = 1
+        else:
+            body["max_tokens"] = 1
+        headers = {**common_headers, "Authorization": f"Bearer {token}"}
+        return _json_request(urls[provider_id], method="POST", headers=headers, body=json.dumps(body).encode("utf-8"))
+
+    if provider_id == "anthropic":
+        body = {"model": model, "max_tokens": 1, "messages": [{"role": "user", "content": prompt}]}
+        headers = {**common_headers, "x-api-key": token, "anthropic-version": "2023-06-01"}
+        return _json_request("https://api.anthropic.com/v1/messages", method="POST", headers=headers, body=json.dumps(body).encode("utf-8"))
+
+    if provider_id == "gemini":
+        model_path = model if model.startswith("models/") else f"models/{model}"
+        safe_model_path = urllib.parse.quote(model_path, safe="/.-_:")
+        url = f"https://generativelanguage.googleapis.com/v1beta/{safe_model_path}:generateContent"
+        body = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"maxOutputTokens": 1, "temperature": 0}}
+        headers = {**common_headers, "x-goog-api-key": token}
+        return _json_request(url, method="POST", headers=headers, body=json.dumps(body).encode("utf-8"))
+
+    if provider_id == "cohere":
+        body = {"model": model, "messages": [{"role": "user", "content": prompt}], "max_tokens": 1}
+        headers = {**common_headers, "Authorization": f"Bearer {token}"}
+        return _json_request("https://api.cohere.com/v2/chat", method="POST", headers=headers, body=json.dumps(body).encode("utf-8"))
+
+    raise ValueError("Inference probing is not available for this provider.")
+
+
+def _set_inference_check(result: dict[str, Any], check: dict[str, str]) -> None:
+    checks = result.setdefault("checks", [])
+    for index, current in enumerate(checks):
+        check_name = str(current.get("name", "")).lower()
+        if "inference" in check_name or "model request permission" in check_name or "generation permission" in check_name:
+            checks[index] = check
+            return
+    checks.append(check)
+
+
+def _with_optional_inference(
+    result: dict[str, Any], provider_id: str, token: str, requested: bool
+) -> dict[str, Any]:
+    if not requested or result.get("status") != "valid":
+        return result
+
+    model_ids = result.get("metadata", {}).get("sample_models", [])
+    if provider_id == "openrouter" and not model_ids:
+        catalogue_status, _catalogue_headers, catalogue = _json_request(
+            "https://openrouter.ai/api/v1/models",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        catalogue_data = catalogue.get("data", []) if isinstance(catalogue, dict) else []
+        if catalogue_status == 200 and isinstance(catalogue_data, list):
+            model_ids = [item.get("id") for item in catalogue_data if isinstance(item, dict) and isinstance(item.get("id"), str)]
+    model = _choose_inference_model(provider_id, model_ids if isinstance(model_ids, list) else [])
+    if not model:
+        inference_check = {
+            "name": "Model inference permission",
+            "status": "unknown",
+            "detail": "The catalogue returned no suitable text-generation model to test. No generation request was sent.",
+        }
+        _set_inference_check(result, inference_check)
+        return result
+
+    try:
+        status, _headers, payload = _post_inference_probe(provider_id, token, model)
+    except (TimeoutError, OSError, ValueError) as exc:
+        _set_inference_check(result, {
+            "name": "Model inference permission",
+            "status": "unknown",
+            "detail": f"The optional generation probe could not be completed ({type(exc).__name__}).",
+        })
+        return result
+
+    if 200 <= status < 300 and isinstance(payload, dict):
+        probe_status = "confirmed"
+        detail = f"The provider accepted a minimal generation request for model {model}. The provider may still apply separate limits or policies to other models."
+        summary = "Credential accepted. The optional minimal inference request also succeeded."
+    elif status in (401, 403):
+        probe_status = "denied"
+        detail = f"The provider rejected the generation request for model {model} (HTTP {status}). Catalogue access alone does not grant inference access."
+        summary = "Credential accepted for catalogue access, but the optional inference request was denied for the selected model."
+    else:
+        probe_status = "unknown"
+        provider_error = _clean_error(payload)
+        detail = f"The generation probe for model {model} returned HTTP {status}. {provider_error[:160]}"
+        summary = "Credential accepted for catalogue access; the optional inference probe was inconclusive."
+
+    _set_inference_check(result, {
+        "name": "Model inference permission",
+        "status": probe_status,
+        "detail": detail,
+    })
+    result["summary"] = summary
+    result.setdefault("metadata", {})["inference_probe"] = {
+        "model": model,
+        "max_output_tokens": 1,
+        "may_consume_provider_quota": True,
+        "http_status": status,
+    }
+    return result
+
+
 PROVIDERS = {
-    "openai": lambda d: validate_openai(d["token"]),
-    "nvidia": lambda d: validate_nvidia(d["token"]),
-    "groq": lambda d: validate_groq(d["token"]),
-    "openrouter": lambda d: validate_openrouter(d["token"]),
-    "gemini": lambda d: validate_gemini(d["token"]),
-    "anthropic": lambda d: validate_anthropic(d["token"]),
-    "mistral": lambda d: validate_mistral(d["token"]),
-    "cohere": lambda d: validate_cohere(d["token"]),
+    "openai": lambda d: _with_optional_inference(validate_openai(d["token"]), "openai", d["token"], d.get("test_inference", False)),
+    "nvidia": lambda d: _with_optional_inference(validate_nvidia(d["token"]), "nvidia", d["token"], d.get("test_inference", False)),
+    "groq": lambda d: _with_optional_inference(validate_groq(d["token"]), "groq", d["token"], d.get("test_inference", False)),
+    "openrouter": lambda d: _with_optional_inference(validate_openrouter(d["token"]), "openrouter", d["token"], d.get("test_inference", False)),
+    "gemini": lambda d: _with_optional_inference(validate_gemini(d["token"]), "gemini", d["token"], d.get("test_inference", False)),
+    "anthropic": lambda d: _with_optional_inference(validate_anthropic(d["token"]), "anthropic", d["token"], d.get("test_inference", False)),
+    "mistral": lambda d: _with_optional_inference(validate_mistral(d["token"]), "mistral", d["token"], d.get("test_inference", False)),
+    "cohere": lambda d: _with_optional_inference(validate_cohere(d["token"]), "cohere", d["token"], d.get("test_inference", False)),
     "huggingface": lambda d: validate_huggingface(d["token"]),
     "github": lambda d: validate_github(d["token"]),
     "codeberg": lambda d: validate_codeberg(d["token"]),
@@ -844,6 +993,10 @@ def validate_credentials(data: Any) -> tuple[int, dict[str, Any]]:
     provider = data.get("provider")
     if not isinstance(provider, str) or provider not in PROVIDERS:
         return 400, {"error": "Unsupported provider."}
+    if "test_inference" in data and not isinstance(data["test_inference"], bool):
+        return 400, {"error": "test_inference must be true or false."}
+    if data.get("test_inference") and provider not in _INFERENCE_PROVIDERS:
+        return 400, {"error": "Optional inference testing is not supported for this provider."}
 
     required_fields = {
         "aws": ["access_key", "secret_key"],

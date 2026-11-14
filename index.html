@@ -99,6 +99,28 @@
     .meta-chip { border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; color: #9aabba; background: rgba(255,255,255,.018); font-size: 10px; }
     .meta-chip b { color: #d3e0e9; font-weight: 650; }
     .layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 17px; align-items: start; margin-top: 30px; }
+    [hidden] { display: none !important; }
+    .picker-section { margin-top: 31px; }
+    .picker-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 15px; }
+    .picker-heading h2 { font-size: 18px; margin: 0; }
+    .picker-heading p { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 6px 0 0; }
+    .picker-count { color: #7e91a2; font-size: 10px; white-space: nowrap; }
+    .picker-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 13px; }
+    .picker-card { min-width: 0; padding: 17px; background: linear-gradient(155deg, rgba(20,30,41,.96), rgba(15,23,32,.98)); border: 1px solid var(--line); border-radius: 14px; }
+    .picker-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .picker-card-title { font-size: 12px; color: #e0eaf1; font-weight: 750; }
+    .picker-card-count { color: #6f8292; font-size: 9px; }
+    .picker-services { display: flex; flex-wrap: wrap; gap: 7px; }
+    .picker-service { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; border: 1px solid rgba(148,169,188,.13); border-radius: 8px; padding: 6px 9px; color: #aebdca; background: rgba(255,255,255,.018); font-size: 10px; text-align: left; transition: border-color .15s, background .15s, color .15s; }
+    .picker-service:hover { border-color: rgba(105,224,189,.38); background: rgba(87,205,168,.08); color: #e5fff6; }
+    .picker-service-icon { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; background: #1c2a36; color: #bad0dc; font-size: 8px; font-weight: 800; }
+    .picker-empty { grid-column: 1 / -1; padding: 25px; border: 1px dashed var(--line-strong); border-radius: 12px; color: #8b9cac; text-align: center; font-size: 11px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 7px; border: 0; padding: 0; margin: 0 0 13px; color: #8d9eae; background: transparent; font-size: 10px; }
+    .back-btn:hover { color: var(--accent-2); }
+    .inference-option { display: flex; align-items: flex-start; gap: 10px; border: 1px solid rgba(241,200,121,.18); background: rgba(241,200,121,.045); border-radius: 10px; padding: 11px 12px; margin: 15px 0 0; }
+    .inference-option input { width: 15px; min-width: 15px; height: 15px; padding: 0; margin: 1px 0 0; accent-color: #70d9b8; }
+    .inference-option label { margin: 0; color: #d5c49c; font-size: 10px; font-weight: 700; cursor: pointer; }
+    .inference-option p { margin: 4px 0 0; color: #a99b7e; font-size: 9px; line-height: 1.55; }
     .panel { background: linear-gradient(155deg, rgba(20, 30, 41, .97), rgba(15, 23, 32, .98)); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
     .form-panel { padding: 23px; }
     .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
@@ -181,6 +203,7 @@
       .top-actions { margin-left: auto; }
       .content { padding: 29px 20px 45px; }
       .layout { grid-template-columns: 1fr; }
+      .picker-grid { grid-template-columns: 1fr; }
       .side-stack { grid-template-columns: 1fr 1fr; }
       .security-panel { grid-column: 1 / -1; }
     }
@@ -231,23 +254,32 @@
       <header class="topbar">
         <div style="display:flex;align-items:center;gap:12px;min-width:0">
           <button class="top-icon" id="menuButton" aria-label="Open navigation" aria-expanded="false">☰</button>
-          <div class="crumb">PermiKey <span style="color:#536576;padding:0 5px">/</span> <strong id="crumbCurrent">AI &amp; Models</strong></div>
+          <div class="crumb">PermiKey <span style="color:#536576;padding:0 5px">/</span> <strong id="crumbCurrent">Choose a provider</strong></div>
         </div>
         <div class="top-actions"><div class="state-pill"><span class="state-dot"></span> No database · No history</div></div>
       </header>
       <div class="content">
         <div class="eyebrow"><span class="eyebrow-line"></span> API SECURITY UTILITY</div>
-        <h1>Know what your keys<br>can actually access.</h1>
-        <p class="intro">Validate API keys and tokens against their provider's own API. Review confirmed access, denied checks, and permission details the provider does not expose. No test prompts, write operations, or automatic key storage.</p>
+        <h1>Validate a key.<br>Understand its access.</h1>
+        <p class="intro">Choose a service to inspect. PermiKey checks credentials against official provider APIs and separates confirmed access from permissions that cannot be verified. AI generation tests are optional and never run unless you enable them.</p>
         <div class="hero-meta">
           <div class="meta-chip"><b>23</b> providers</div>
           <div class="meta-chip"><b>5</b> service categories</div>
-          <div class="meta-chip"><b>Read-only</b> checks</div>
+          <div class="meta-chip"><b>Read-only by default</b> checks</div>
           <div class="meta-chip"><b>Stateless</b> by design</div>
         </div>
 
-        <div class="layout">
+        <section class="picker-section" id="homeScreen">
+          <div class="picker-heading">
+            <div><h2>Choose a service to get started</h2><p>Select a provider first. You will only see the credential fields needed for that service.</p></div>
+            <span class="picker-count" id="pickerCount">23 integrations</span>
+          </div>
+          <div class="picker-grid" id="providerPicker" aria-label="Choose a provider"></div>
+        </section>
+
+        <div class="layout" id="workspaceScreen" hidden>
           <section>
+            <button class="back-btn" type="button" id="backToProviders">← All providers</button>
             <div class="panel form-panel">
               <div class="panel-head">
                 <div class="provider-title-wrap">
@@ -259,7 +291,11 @@
               <p class="service-desc" id="providerDescription"></p>
               <form id="credentialForm" autocomplete="off" novalidate>
                 <div id="fields"></div>
-                <div class="form-note"><span class="note-icon">ⓘ</span><span>Use only credentials you own or are authorised to assess. PermiKey sends the credential to the selected provider's official HTTPS API and clears the form after the check.</span></div>
+                <div class="inference-option" id="inferenceOption" hidden>
+                  <input id="testInference" type="checkbox" name="test_inference" value="true">
+                  <div><label for="testInference">Run an optional minimal inference test</label><p>Sends one short test prompt and requests at most one output token. This can consume provider quota or incur charges. Leave unchecked for credential and catalogue checks only.</p></div>
+                </div>
+                <div class="form-note"><span class="note-icon">ⓘ</span><span>Use only credentials you own or are authorised to assess. PermiKey sends credentials to the selected provider's official HTTPS API and clears the form after the check. Optional inference tests may consume usage.</span></div>
                 <div class="form-actions">
                   <button class="primary-btn" id="submitButton" type="submit">Validate credential <span aria-hidden="true">→</span></button>
                   <button class="secondary-btn" type="reset" id="clearButton">Clear fields</button>
@@ -281,7 +317,7 @@
           <aside class="side-stack">
             <div class="panel info-panel">
               <div class="info-title">How PermiKey works</div>
-              <div class="step"><div class="step-num">01</div><div class="step-copy"><b>Choose a provider</b><span>Select a service from the categories in the sidebar.</span></div></div>
+              <div class="step"><div class="step-num">01</div><div class="step-copy"><b>Choose a provider</b><span>Choose a service from the category cards or the sidebar.</span></div></div>
               <div class="step"><div class="step-num">02</div><div class="step-copy"><b>Submit one-time credentials</b><span>The backend calls a fixed, official HTTPS validation endpoint.</span></div></div>
               <div class="step"><div class="step-num">03</div><div class="step-copy"><b>Read the evidence</b><span>See what was confirmed, denied, or not available to inspect.</span></div></div>
             </div>
@@ -308,13 +344,13 @@
   "use strict";
 
   const providers = [
-    { id:"openai", name:"OpenAI", short:"OA", category:"AI & Models", desc:"Checks the API key against OpenAI's model-list endpoint. It confirms key authentication and catalogue access without sending a billable prompt.", fields:[{name:"token",label:"OpenAI API key",placeholder:"sk-…",hint:"Project and organization restrictions may affect individual model requests."}] },
+    { id:"openai", name:"OpenAI", short:"OA", category:"AI & Models", desc:"Checks the API key against OpenAI's model-list endpoint. It confirms authentication and catalogue access; optional inference probing is available separately.", fields:[{name:"token",label:"OpenAI API key",placeholder:"sk-…",hint:"Project and organization restrictions may affect individual model requests."}] },
     { id:"nvidia", name:"NVIDIA NIM", short:"NV", category:"AI & Models", desc:"Checks an NVIDIA API Catalog / Integrate key against the hosted NIM model catalogue. Self-hosted NIM endpoints are not covered by this preset.", fields:[{name:"token",label:"NVIDIA API key",placeholder:"nvapi-…",hint:"Uses integrate.api.nvidia.com. It does not probe your own deployed NIM server."}] },
     { id:"groq", name:"Groq", short:"GQ", category:"AI & Models", desc:"Uses Groq's OpenAI-compatible model-list endpoint to verify the credential and check model catalogue visibility.", fields:[{name:"token",label:"Groq API key",placeholder:"gsk_…"}] },
     { id:"openrouter", name:"OpenRouter", short:"OR", category:"AI & Models", desc:"Uses OpenRouter's current-key information endpoint to verify the key and show metadata such as limits and usage when returned.", fields:[{name:"token",label:"OpenRouter API key",placeholder:"sk-or-v1-…"}] },
-    { id:"gemini", name:"Google Gemini", short:"G", category:"AI & Models", desc:"Uses Google's Gemini models.list endpoint. It reports model catalogue entries and methods advertised by those models.", fields:[{name:"token",label:"Gemini API key",placeholder:"AIza…",hint:"The key is sent in x-goog-api-key, not in the URL query string."}] },
-    { id:"anthropic", name:"Anthropic", short:"AN", category:"AI & Models", desc:"Checks the Anthropic Models API using the x-api-key header and required API version header.", fields:[{name:"token",label:"Anthropic API key",placeholder:"sk-ant-…"}] },
-    { id:"mistral", name:"Mistral AI", short:"MI", category:"AI & Models", desc:"Checks Mistral's model-list endpoint and reports model catalogue visibility. No generation request is sent.", fields:[{name:"token",label:"Mistral API key",placeholder:"Your Mistral API key"}] },
+    { id:"gemini", name:"Google Gemini", short:"G", category:"AI & Models", desc:"Uses Google's Gemini models.list endpoint. It reports visible models and advertised methods; an optional probe can test one generation request.", fields:[{name:"token",label:"Gemini API key",placeholder:"AIza…",hint:"The key is sent in x-goog-api-key, not in the URL query string."}] },
+    { id:"anthropic", name:"Anthropic", short:"AN", category:"AI & Models", desc:"Checks the Anthropic Models API using the x-api-key header and required API version header. Optional probing can test one message request.", fields:[{name:"token",label:"Anthropic API key",placeholder:"sk-ant-…"}] },
+    { id:"mistral", name:"Mistral AI", short:"MI", category:"AI & Models", desc:"Checks Mistral's model-list endpoint and reports model catalogue visibility. Optional inference probing can test one listed model.", fields:[{name:"token",label:"Mistral API key",placeholder:"Your Mistral API key"}] },
     { id:"cohere", name:"Cohere", short:"CO", category:"AI & Models", desc:"Uses Cohere's model-list endpoint to confirm authentication and catalogue access.", fields:[{name:"token",label:"Cohere API key",placeholder:"Your Cohere API key"}] },
     { id:"huggingface", name:"Hugging Face", short:"HF", category:"AI & Models", desc:"Checks a Hugging Face User Access Token with the Hub identity endpoint. Fine-grained access can still vary by repository and organisation.", fields:[{name:"token",label:"Hugging Face access token",placeholder:"hf_…"}] },
     { id:"github", name:"GitHub", short:"GH", category:"Code & Repositories", desc:"Checks the authenticated-user endpoint. Classic PAT OAuth scopes are displayed when GitHub returns them; fine-grained repository grants are not inferred.", fields:[{name:"token",label:"GitHub personal access token",placeholder:"github_pat_… or ghp_…",hint:"Fine-grained token permissions vary by repository and are not completely exposed by the identity endpoint."}] },
@@ -375,8 +411,13 @@
   const resultPanel = document.getElementById("resultPanel");
   const providerSearch = document.getElementById("providerSearch");
   const navSearchMeta = document.getElementById("navSearchMeta");
-  let selected = providers[0];
-  const expandedCategories = new Set([providers[0].category]);
+  const homeScreen = document.getElementById("homeScreen");
+  const workspaceScreen = document.getElementById("workspaceScreen");
+  const providerPicker = document.getElementById("providerPicker");
+  let selected = null;
+  const expandedCategories = new Set();
+  const inferenceProviders = new Set(["openai", "nvidia", "groq", "openrouter", "gemini", "anthropic", "mistral", "cohere"]);
+  providers.forEach(provider => { provider.supportsInference = inferenceProviders.has(provider.id); });
 
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 
@@ -413,11 +454,40 @@
           <span class="nav-heading-right"><span class="nav-heading-count">${items.length.toString().padStart(2,"0")}</span><span class="nav-chevron" aria-hidden="true">⌄</span></span>
         </button>
         <div class="nav-items" id="${panelId}"><div class="nav-items-inner">${items.map(provider => `
-          <button class="nav-item ${provider.id === selected.id ? "active" : ""}" type="button" data-provider="${esc(provider.id)}" aria-current="${provider.id === selected.id ? "page" : "false"}">
+          <button class="nav-item ${selected && provider.id === selected.id ? "active" : ""}" type="button" data-provider="${esc(provider.id)}" aria-current="${selected && provider.id === selected.id ? "page" : "false"}">
             <span class="provider-icon">${esc(provider.short)}</span><span>${esc(provider.name)}</span>
           </button>`).join("")}</div></div>
       </section>`;
     }).join("");
+  }
+
+  function renderHome() {
+    selected = null;
+    homeScreen.hidden = false;
+    workspaceScreen.hidden = true;
+    document.getElementById("crumbCurrent").textContent = "Choose a provider";
+    resultPanel.classList.remove("visible");
+    const matches = matchingProviders(providerSearch.value);
+    const searching = providerSearch.value.trim().length > 0;
+    const cards = categories.map(category => {
+      const items = providers.filter(provider => provider.category === category && matches.some(match => match.id === provider.id));
+      if (!items.length) return "";
+      return `<section class="picker-card">
+        <div class="picker-card-head"><span class="picker-card-title">${esc(category)}</span><span class="picker-card-count">${items.length} service${items.length === 1 ? "" : "s"}</span></div>
+        <div class="picker-services">${items.map(provider => `<button class="picker-service" type="button" data-pick-provider="${esc(provider.id)}"><span class="picker-service-icon">${esc(provider.short)}</span>${esc(provider.name)}</button>`).join("")}</div>
+      </section>`;
+    }).join("");
+    providerPicker.innerHTML = cards || `<div class="picker-empty">No matching providers. Try another search.</div>`;
+    document.getElementById("pickerCount").textContent = searching ? `${matches.length} matching services` : `${providers.length} integrations`;
+    renderNav();
+  }
+
+  function selectProvider(provider) {
+    selected = provider;
+    homeScreen.hidden = true;
+    workspaceScreen.hidden = false;
+    renderProvider();
+    showMobileNav(false);
   }
 
   function renderField(field) {
@@ -432,12 +502,18 @@
   }
 
   function renderProvider() {
+    if (!selected) return;
+    homeScreen.hidden = true;
+    workspaceScreen.hidden = false;
     document.getElementById("providerLogo").textContent = selected.short;
     document.getElementById("providerName").textContent = selected.name;
     document.getElementById("providerCategory").textContent = selected.category;
     document.getElementById("providerDescription").textContent = selected.desc;
     document.getElementById("crumbCurrent").textContent = selected.category;
     fields.innerHTML = selected.fields.map(renderField).join("");
+    const inferenceOption = document.getElementById("inferenceOption");
+    inferenceOption.hidden = !selected.supportsInference;
+    document.getElementById("testInference").checked = false;
     document.getElementById("formError").style.display = "none";
     resultPanel.classList.remove("visible");
     expandedCategories.add(selected.category);
@@ -463,10 +539,21 @@
     const providerButton = event.target.closest("[data-provider]");
     if (!providerButton) return;
     const next = providers.find(provider => provider.id === providerButton.dataset.provider);
-    if (next) { selected = next; renderProvider(); showMobileNav(false); }
+    if (next) selectProvider(next);
   });
 
-  providerSearch.addEventListener("input", renderNav);
+  providerPicker.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-pick-provider]");
+    if (!button) return;
+    const next = providers.find(provider => provider.id === button.dataset.pickProvider);
+    if (next) selectProvider(next);
+  });
+
+  providerSearch.addEventListener("input", () => {
+    if (!selected) renderHome();
+    else renderNav();
+  });
+  document.getElementById("backToProviders").addEventListener("click", renderHome);
 
   fields.addEventListener("click", (event) => {
     const button = event.target.closest("[data-reveal]");
@@ -518,7 +605,7 @@
     event.preventDefault();
     const error = document.getElementById("formError");
     error.style.display = "none";
-    const data = {provider: selected.id};
+    const data = {provider: selected.id, test_inference: Boolean(selected.supportsInference && document.getElementById("testInference").checked)};
     for (const field of selected.fields) {
       const input = document.getElementById(`field-${field.name}`);
       if (input) data[field.name] = input.value.trim();
@@ -554,12 +641,13 @@
         if (input && input.type === "text" && field.kind !== "text") input.type = "password";
       });
       fields.querySelectorAll("[data-reveal]").forEach(button => { button.textContent = "Show"; });
+      document.getElementById("testInference").checked = false;
       submitButton.disabled = false;
       submitButton.innerHTML = 'Validate credential <span aria-hidden="true">→</span>';
     }
   });
 
-  renderProvider();
+  renderHome();
 })();
 </script>
 </body>
